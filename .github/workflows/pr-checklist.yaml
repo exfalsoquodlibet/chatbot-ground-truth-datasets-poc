@@ -1,0 +1,29 @@
+name: PR Checklist Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check for version_info.yaml and CHANGELOG.md update
+        run: |
+          MISSING_INFO=false
+          if ! git diff origin/main ${{ github.sha }} --name-only | grep -q "version_info.yaml"; then
+            echo "version_info.yaml missing in new version folder"
+            MISSING_INFO=true
+          fi
+          if ! git diff origin/main ${{ github.sha }} --name-only | grep -q "CHANGELOG.md"; then
+            echo "CHANGELOG.md not updated"
+            MISSING_INFO=true
+          fi
+
+          if [ "$MISSING_INFO" = true ]; then
+            echo "Please add a version_info.yaml and update CHANGELOG.md"
+            exit 1
+          fi

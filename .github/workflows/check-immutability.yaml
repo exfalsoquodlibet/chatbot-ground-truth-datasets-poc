@@ -1,0 +1,23 @@
+name: Prevent Old Version Edits
+# once a version folder (like v1/, v2/) is created, files in it cannot be modified. Only new version folders can be added
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check_immutable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check immutable versions
+        run: |
+          git fetch origin main
+          CHANGED=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "components/.*/csv/v[0-9]+/.+" || true)
+          if [ -n "$CHANGED" ]; then
+            echo "Error: Detected changes to existing version folders:"
+            echo "$CHANGED"
+            exit 1
+          fi
