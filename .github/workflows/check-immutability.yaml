@@ -1,23 +1,73 @@
 name: Prevent Old Version Edits
 # once a version folder (like v1/, v2/) is created, files in it cannot be modified. Only new version folders can be added
 
+# NOTES:
+# in a pull_request workflow, ${{ github.sha }} represents the merged result of the entire PR
+# also, HEAD and github.sha point to the same (temporary merge) commit in a PR context
+
+# git merge-base origin/main HEAD fetches the common ancestor commit where the PR branched from main
+
+# git ls-tree --name-only -d origin/main:components lists existing version folders in main branch under components/
+# --> only folders already in main are treated as immutable.
+
+
+# We compare the cumulative changes introduced by the PR (across all its commits)
+# against the current main branch, and ensure that no files under existing
+# version folders (components/*/csv/vX/) are modified.
+
+
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize] # when opened, and if new pushed commits are added to the PR
 
 jobs:
   check_immutable:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # get full commit history
 
-      - name: Check immutable versions
+      - name: Check immutable version folders
         run: |
+          echo "Fetching main branch..."
           git fetch origin main
-          CHANGED=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "components/.*/csv/v[0-9]+/.+" || true)
+
+          # find merge base (where the PR branched from main, i.e., common ancestor commit)
+          BASE=$(git merge-base origin/main HEAD)
+          echo "Merge base: $BASE"
+
+          # list top-level components
+          EXISTING_COMPONENTS=$(git ls-tree --name-only -d origin/main:components | tr '\n' ' ')
+
+          # show nested CSV subfolders for each component
+          for comp in $EXISTING_COMPONENTS; do
+            echo "Existing top-level components in main: $comp"
+            # list all subfolders under csv/
+            git ls-tree --name-only -d "origin/main:components/$comp/csv" | while read sub; do
+              echo "  csv subfolder: $sub"
+            done
+          done
+
+
+          # show all changed files
+          echo "All files changed in this PR:"
+          git diff --name-status "$BASE" HEAD
+
+          # check PR for modifications only (M) inside existing folders
+          CHANGED=$(git diff --name-only --diff-filter=M "$BASE" HEAD | while read file; do
+            for folder in $EXISTING_COMPONENTS; do
+              if [[ "$file" =~ ^components/$folder/csv/.+/v[0-9]+/.*\.csv$ ]]; then
+                echo "$file"
+              fi
+            done
+          done)
+
           if [ -n "$CHANGED" ]; then
-            echo "Error: Detected changes to existing version folders:"
+            echo "Error: Detected modifications to existing version folders:"
             echo "$CHANGED"
             exit 1
+          else
+            echo "No changes detected in existing version folders. Check passed."
           fi
