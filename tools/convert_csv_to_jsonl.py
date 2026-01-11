@@ -25,7 +25,11 @@ def get_changed_csv_files():
     print(f"Checking changes between {commit_before} and {commit_after}")
 
     # shows the status and filename (path) of changed files (note: \t tab separator between status and filename)
+    # it shows all files that changed between the previous main commit and the merge commit, i.e., all files introduced or changed by the PR (across all its commits)
     diff = run(f"git diff --name-status {commit_before} {commit_after}").splitlines()
+    print("Changed files:")
+    for line in diff:
+        print(f"  {line}")
     changed_csvs = []
 
     for line in diff:

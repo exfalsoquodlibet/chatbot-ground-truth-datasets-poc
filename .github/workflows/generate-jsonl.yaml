@@ -1,0 +1,74 @@
+name: Generate JSONL
+
+# Workflow: Generate JSONL from CSV files on main branch
+#
+# Trigger:
+#   - On push to the `main` branch (after PRs are merged)
+#
+# Purpose:
+#   - Detect CSV files changed in the latest commit(s)
+#     on main, convert them to JSONL using a Python script,
+#     and commit the generated JSONL back to the repository.
+#
+# Key Features:
+#   - Full git history fetched to compute diffs across commits
+#   - Handles first commit edge case by using the empty tree hash
+#   - Serialises workflow runs with concurrency to prevent git push conflicts
+#   - Uses environment variables GIT_BEFORE and GIT_AFTER
+#     to pass commit SHAs to the Python script
+#   - Automatically commits and pushes updated JSONL files
+#     with the GitHub Actions bot identity
+
+on:
+  push:
+    branches:
+      - main # trigger on pushes to main branch (i.e., after PRs are merged)
+
+concurrency:
+  group: generate-jsonl-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  generate_jsonl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code  # makes repo files available to the workflow (GA runner) in the working directory
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install uv # install uv on the runner
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Determine previous commit for diff
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            # Use the empty tree hash so that git diff works on the first push to the branch
+            echo "GIT_BEFORE=4b825dc642cb6eb9a060e54bf8d69288fbee4904" >> "$GITHUB_ENV"
+          else
+            echo "GIT_BEFORE=${{ github.event.before }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Convert CSV to JSONL
+        run: |
+          uv run python tools/convert_csv_to_jsonl.py
+        env:
+          GIT_BEFORE: ${{ env.GIT_BEFORE }} # normalized past commit (or empty tree) before this PR merged
+          GIT_AFTER: ${{ github.event.after }} # merge commit on main after your PR merged
+
+      - name: Commit generated JSONL
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add components/**/jsonl/**
+          git commit -m "Auto-generated JSONL from merged CSVs [skip ci]" || echo "No changes to commit"
+          git push

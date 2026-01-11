@@ -1,0 +1,56 @@
+name: PR Checklist Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for version_info.yaml and CHANGELOG.md update
+        run: |
+          set -e
+
+          echo "Checking for added CSV files under components/..."
+
+          echo "Modified files in this PR:"
+          git diff origin/main ${{ github.sha }} --name-only
+
+          # find added CSV files under components/
+          ADDED_CSVS=$(git diff origin/main ${{ github.sha }} --name-status \
+            | awk '$1 == "A" && $2 ~ /^components\/.*\.csv$/')
+
+          if [ -z "$ADDED_CSVS" ]; then
+            echo "No new CSV files added under components/. Skipping checklist."
+            exit 0
+          fi
+
+          echo "Detected added CSV files:"
+          echo "$ADDED_CSVS"
+
+          MISSING_INFO=false
+
+          if ! git diff origin/main ${{ github.sha }} --name-only | grep -q "version_info.yaml"; then
+            echo "version_info.yaml missing in new version folder"
+            MISSING_INFO=true
+          fi
+
+          if ! git diff origin/main ${{ github.sha }} --name-only | grep -q "CHANGELOG.md"; then
+            echo "CHANGELOG.md not updated"
+            MISSING_INFO=true
+          fi
+
+          if [ "$MISSING_INFO" = true ]; then
+            echo ""
+            echo "CSV files were added under components/, but required metadata is missing."
+            echo "Please add a version_info.yaml and update CHANGELOG.md."
+            exit 1
+          fi
+
+          echo "Checklist satisfied."
