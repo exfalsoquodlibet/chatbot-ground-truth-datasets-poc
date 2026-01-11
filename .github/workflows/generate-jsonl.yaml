@@ -8,6 +8,8 @@ on:
 jobs:
   generate_jsonl:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code.  # makes repo files available to the workflow (GA runner) in the working directory
         uses: actions/checkout@v3
