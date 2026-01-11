@@ -5,6 +5,9 @@ on:
     branches:
       - main # trigger on pushes to main branch (i.e., after PRs are merged)
 
+concurrency:
+  group: generate-jsonl-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   generate_jsonl:
     runs-on: ubuntu-latest
