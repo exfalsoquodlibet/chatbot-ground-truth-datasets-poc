@@ -1,5 +1,24 @@
 name: Generate JSONL
 
+# Workflow: Generate JSONL from CSV files on main branch
+#
+# Trigger:
+#   - On push to the `main` branch (after PRs are merged)
+#
+# Purpose:
+#   - Detect CSV files changed in the latest commit(s)
+#     on main, convert them to JSONL using a Python script,
+#     and commit the generated JSONL back to the repository.
+#
+# Key Features:
+#   - Full git history fetched to compute diffs across commits
+#   - Handles first commit edge case by using the empty tree hash
+#   - Serialises workflow runs with concurrency to prevent git push conflicts
+#   - Uses environment variables GIT_BEFORE and GIT_AFTER
+#     to pass commit SHAs to the Python script
+#   - Automatically commits and pushes updated JSONL files
+#     with the GitHub Actions bot identity
+
 on:
   push:
     branches:
