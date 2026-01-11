@@ -30,11 +30,20 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Determine previous commit for diff
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            # Use the empty tree hash so that git diff works on the first push to the branch
+            echo "GIT_BEFORE=4b825dc642cb6eb9a060e54bf8d69288fbee4904" >> "$GITHUB_ENV"
+          else
+            echo "GIT_BEFORE=${{ github.event.before }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Convert CSV to JSONL
         run: |
           uv run python tools/convert_csv_to_jsonl.py
         env:
-          GIT_BEFORE: ${{ github.event.before }} # past commit on main before this PR merged
+          GIT_BEFORE: ${{ env.GIT_BEFORE }} # normalized past commit (or empty tree) before this PR merged
           GIT_AFTER: ${{ github.event.after }} # merge commit on main after your PR merged
 
       - name: Commit generated JSONL
