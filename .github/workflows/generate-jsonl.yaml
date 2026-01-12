@@ -69,6 +69,7 @@ jobs:
       - name: Create and auto-merge PR
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.PAT_TOKEN }}  # this is a PAT stored in the repo secrets
           branch: auto-jsonl-update-${{ github.sha }}
           title: 'Auto: Update JSONL from CSV changes'
           body: Automatically generated JSONL files
