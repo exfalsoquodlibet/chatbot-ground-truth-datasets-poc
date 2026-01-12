@@ -32,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write # needed for creating PRs
     steps:
       - name: Checkout code  # makes repo files available to the workflow (GA runner) in the working directory
         uses: actions/checkout@v4
