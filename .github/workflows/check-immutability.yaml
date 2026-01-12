@@ -23,6 +23,7 @@ on:
 jobs:
   check_immutable:
     runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'  # skip for bot PRs
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
