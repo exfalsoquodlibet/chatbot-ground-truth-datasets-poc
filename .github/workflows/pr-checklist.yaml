@@ -8,11 +8,6 @@ jobs:
   check_pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Skip check for bot PRs
-        if: startsWith(github.head_ref, 'auto-jsonl-update-') || github.actor == 'github-actions[bot]'
-        run: |
-          echo "Skipping PR checklist for automated JSONL generation"
-          exit 0
 
       - name: Checkout code
         uses: actions/checkout@v4

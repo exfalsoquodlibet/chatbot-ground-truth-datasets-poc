@@ -24,11 +24,6 @@ jobs:
   check_immutable:
     runs-on: ubuntu-latest
     steps:
-      - name: Skip check for bot PRs
-        if: startsWith(github.head_ref, 'auto-jsonl-update-') || github.actor == 'github-actions[bot]'
-        run: |
-          echo "Skipping immutability check for automated JSONL generation"
-          exit 0
 
       - name: Checkout code
         uses: actions/checkout@v4
