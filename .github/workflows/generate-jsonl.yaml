@@ -65,19 +65,13 @@ jobs:
           GIT_BEFORE: ${{ env.GIT_BEFORE }} # normalized past commit (or empty tree) before this PR merged
           GIT_AFTER: ${{ github.event.after }} # merge commit on main after your PR merged
 
-      - name: Commit and push to separate branch
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b auto-jsonl-update-${{ github.sha }}
-          git add components/**/jsonl/**
-          git commit -m "Auto-generated JSONL from merged CSVs [skip ci]" || exit 0
-          git push origin auto-jsonl-update-${{ github.sha }}
-
       - name: Create and auto-merge PR
         uses: peter-evans/create-pull-request@v5
         with:
           branch: auto-jsonl-update-${{ github.sha }}
           title: 'Auto: Update JSONL from CSV changes'
           body: Automatically generated JSONL files
+          commit-message: "Auto-generated JSONL from merged CSVs [skip ci]"
+          add-paths: |
+            components/**/jsonl/**
           delete-branch: true
