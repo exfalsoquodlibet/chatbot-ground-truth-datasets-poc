@@ -23,12 +23,8 @@ on:
 jobs:
   check_immutable:
     runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]' && !startsWith(github.head_ref, 'auto-jsonl-update-')
     steps:
-      - name: Skip check for automated PRs
-        if: github.actor == 'github-actions[bot]' || startsWith(github.head_ref, 'auto-jsonl-update-')
-        run: |
-          echo "Skipping check for automated JSONL generation"
-          exit 0
       - name: Checkout code
         uses: actions/checkout@v4
         with:
