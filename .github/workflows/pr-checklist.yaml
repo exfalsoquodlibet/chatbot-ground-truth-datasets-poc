@@ -7,7 +7,6 @@ on:
 jobs:
   check_pr:
     runs-on: ubuntu-latest
-    if: github.actor != 'github-actions[bot]' && !startsWith(github.head_ref, 'auto-jsonl-update-')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
