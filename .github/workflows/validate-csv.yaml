@@ -1,0 +1,33 @@
+name: Validate CSV to JSONL Conversion
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  validate_conversion:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]' && !startsWith(github.head_ref, 'auto-jsonl-update-')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Validate CSV to JSONL conversion (dry-run)
+        run: |
+          uv run python tools/convert_csv_to_jsonl.py --dry-run
+        env:
+          GIT_BEFORE: origin/main
+          GIT_AFTER: ${{ github.sha }}
