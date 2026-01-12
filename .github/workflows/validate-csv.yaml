@@ -25,9 +25,17 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Determine base commit for diff
+        run: |
+          # Fetch main to ensure we have the latest
+          git fetch origin main
+          # Get the actual SHA of origin/main
+          echo "GIT_BEFORE=$(git rev-parse origin/main)" >> "$GITHUB_ENV"
+          echo "GIT_AFTER=${{ github.sha }}" >> "$GITHUB_ENV"
+
       - name: Validate CSV to JSONL conversion (dry-run)
         run: |
           uv run python tools/convert_csv_to_jsonl.py --dry-run
         env:
-          GIT_BEFORE: origin/main
-          GIT_AFTER: ${{ github.sha }}
+          GIT_BEFORE: ${{ env.GIT_BEFORE }}
+          GIT_AFTER: ${{ env.GIT_AFTER }}
