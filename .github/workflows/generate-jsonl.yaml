@@ -73,7 +73,7 @@ jobs:
           branch: auto-jsonl-update-${{ github.sha }}
           title: 'Auto: Update JSONL from CSV changes'
           body: Automatically generated JSONL files
-          commit-message: "Auto-generated JSONL from merged CSVs [skip ci]"
+          commit-message: "Auto-generated JSONL from merged CSVs"
           add-paths: |
             components/**/jsonl/**
           delete-branch: true
