@@ -83,8 +83,12 @@ def csv_to_jsonl(csv_path: Path, dry_run=True):
             model_instance = parse_row_with_model(row.to_dict(), component)
             jsonl_records.append(model_instance.model_dump())
         except Exception as e:
-            print(f"Row {i+1} error: {e}")
+            print(f"Validation failed for {csv_path}")
+            print(f"   Row {i+1} (line {i+2} in CSV) error: {e}")
+            print(f"   Row data: {row.to_dict()}")
             return False
+
+    print(f"Model validation successful: {len(jsonl_records)} rows validated")
 
     # construct output path: replace /csv/ with /jsonl/
     jsonl_path = Path(str(csv_path).replace("/csv/", "/jsonl/")).with_suffix(".jsonl")
