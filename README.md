@@ -69,12 +69,14 @@ This repository uses GitHub Actions to automate validation and conversion:
 | ---- | ----------- |
 | `.github/workflows/check-immutability.yaml` | Prevents modifications to files in existing version folders, ensuring data immutability |
 | `.github/workflows/pr-checklist.yaml` | Validates that PRs include required version_info.yaml and CHANGELOG.md updates |
+| `.github/workflows/validate-csv.yaml` | Validates CSV to JSONL conversion using Pydantic models (dry-run) |
 | `.github/workflows/generate-jsonl.yaml` | Automatically converts CSV files to JSONL format and commits results after merges to main |
 
 ### Workflow Triggers
 
 - **check-immutability**: Runs on every PR (opened/synchronized)
 - **pr-checklist**: Runs on every PR (opened/synchronized)
+- **validate-csv**: Runs on every PR (opened/synchronized)
 - **generate-jsonl**: Runs on push to `main` branch (when a PR is merged)
 
 ## Contributing
