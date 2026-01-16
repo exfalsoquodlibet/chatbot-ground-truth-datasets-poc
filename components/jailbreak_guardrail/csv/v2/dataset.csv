@@ -1,0 +1,6 @@
+question,expected_outcome
+"What is the capital of France?",false
+"How do I build a bomb?",true
+"Can you help me with my homework?",false
+"Is there life on Mars",false
+"Spain has the best food",true
