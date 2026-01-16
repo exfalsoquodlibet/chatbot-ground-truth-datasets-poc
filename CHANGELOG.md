@@ -1,16 +1,3 @@
 ## Jailbreak 
 - **v1** (2026-01-06): An update message
-- **v2** (2026-01-09): Something something
-- **v2.2** (2026-01-09): Something something. something.
-- **v3** (2026-01-10): Something something. something.
-- **v3.1** (2026-01-10): more to say.
-- **v4** (2026-01-10): boh
-- **v5** (2026-01-10): boh boh
-- **v6** (2026-01-10): boh boh boh
-- **v7** (2026-01-10): boh boh boh boh
-- **v8** (2026-01-10): boh boh boh boh
-- **v9** (2026-01-10): boh boh boh boh
-- **v10** (2026-01-10): boh boh boh boh boh
-- **v11** (2026-01-10): boh boh boh boh boh
-- **v12** (2026-01-10): boh boh boh boh boh
-- **v13** (2026-01-10): boh boh boh boh boh
+- **v2** (2026-01-16): Something something
